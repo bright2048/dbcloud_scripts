@@ -1,18 +1,16 @@
 #!/bin/bash
 #检查nfs是否正常挂载,如果失败则自动挂载
-NFSIP=`grep nfs /etc/fstab |awk -F: '{print $1}'`
-NFS_SRC=`grep nfs /etc/fstab |awk  '{print $1}'`
-NFS_DEST=`grep nfs /etc/fstab |awk  '{print $2}'`
-NFS_FLAG=`grep nfs /etc/fstab|wc -l`
-INTERVALS=$1
-if [ ${NFS_FLAG} -eq 0 ]
-then
-	echo "no nfs volume found, exit!"
-	exit 1
-fi
+#!/bin/bash
+NFSIP=`grep nfs /etc/fstab |grep ^#|awk -F: '{print $1}'`
+NFS_SRC=`grep nfs /etc/fstab |grep ^#|awk  '{print $1}'`
+NFS_DEST=`grep nfs /etc/fstab |grep ^#|awk  '{print $2}'`
 while true
 do
-	MOUNT_FLAG=`mount |grep ${NFSIP}|wc -l`
+    if [ -z "$NFSIP" ]
+    then
+	   exit 0
+    else
+        MOUNT_FLAG=`mount |grep ${NFSIP}|wc -l`
 		if [ ${MOUNT_FLAG} -ne 1 ]
 		then
 		    echo "nfs umounted , try to mount again"
@@ -21,7 +19,8 @@ do
 		else
 		    echo "nfs mount is healthy!"
 		fi
-	sleep ${INTERVALS:=30}s
+        sleep 10s
+    fi
 done
 
 #对应的supervisor配置:
